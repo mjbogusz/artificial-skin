@@ -77,10 +77,18 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.serialDisconnectReq.emit()
 
 	def selectedColumnChanged(self, column):
+		if self.selectedCell[1] == column:
+			return
+
 		self.selectedCell = (column, self.selectedCell[1])
+		self.cellData = []
 
 	def selectedRowChanged(self, row):
+		if self.selectedCell[0] == row:
+			return
+
 		self.selectedCell = (self.selectedCell[0], row)
+		self.cellData = []
 
 	def updateMap(self, rows, columns, mapData, mapRawData):
 		self.rows = rows
