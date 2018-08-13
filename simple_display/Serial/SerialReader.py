@@ -7,13 +7,15 @@ from PyQt5 import QtCore
 class SerialReader(QtCore.QThread):
 	statusString = QtCore.pyqtSignal(str)
 	serialPortsUpdated = QtCore.pyqtSignal(list)
-	pressureMapUpdated = QtCore.pyqtSignal(int, int, list)
+	pressureMapUpdated = QtCore.pyqtSignal(int, int, list, list)
 
-	def __init__(self, parent, baudrate = 115200, exchangeRowsColumns = False):
+	def __init__(self, parent, baudrate = 115200, exchangeRowsColumns = False, valueMax = 3300.0, valueThreshold = 0.15):
 		super().__init__(parent)
 
 		self.baudrate = baudrate
 		self.exchangeRowsColumns = exchangeRowsColumns
+		self.valueMax = valueMax
+		self.valueThreshold = valueThreshold
 
 		self.exitFlag = False
 		self.serial = None
@@ -31,6 +33,7 @@ class SerialReader(QtCore.QThread):
 			return
 
 		self.serial = serial.Serial(self.serialName, self.baudrate)
+		self.serial.flushInput()
 		self.statusString.emit('Connected: ' + self.serialName)
 
 	def disconnectSerial(self):
@@ -84,11 +87,19 @@ class SerialReader(QtCore.QThread):
 
 		self.serialPortsUpdated.emit(result)
 
+	def processRawValue(self, value):
+		t = 1.0 - float(value) / self.valueMax
+		t = (t - self.valueThreshold) / (1.0 - self.valueThreshold)
+		if t < 0.0:
+			t = 0.0
+		return t
+
 	def parseLine(self, line):
 		rowData = line.strip().split(';')
 		rows = len(rowData) - 1
 
 		pressureMap = []
+		pressureMapRaw = []
 		for r in rowData:
 			if not len(r):
 				continue
@@ -97,27 +108,35 @@ class SerialReader(QtCore.QThread):
 			columns = len(fieldData)
 
 			rowValues = []
+			rowValuesRaw = []
 			for rawValue in fieldData:
 				if not len(rawValue):
 					continue
-				rowValues.append(int(rawValue))
+				rowValues.append(self.processRawValue(rawValue))
+				rowValuesRaw.append(float(rawValue))
 
 			pressureMap.append(rowValues)
+			pressureMapRaw.append(rowValuesRaw)
 
 		if self.exchangeRowsColumns:
 			pressureMap2 = []
+			pressureMapRaw2 = []
 			for i in range(columns):
 				columnValues = []
+				columnValuesRaw = []
 				for j in range(rows):
 					columnValues.append(pressureMap[j][i])
+					columnValuesRaw.append(pressureMapRaw[j][i])
 				pressureMap2.append(columnValues)
+				pressureMapRaw2.append(columnValuesRaw)
 
 			pressureMap = pressureMap2
+			pressureMapRaw = pressureMapRaw2
 			t = rows
 			rows = columns
 			columns = t
 
-		self.pressureMapUpdated.emit(rows, columns, pressureMap)
+		self.pressureMapUpdated.emit(rows, columns, pressureMap, pressureMapRaw)
 
 	def run(self):
 		dataBuffer = ''
