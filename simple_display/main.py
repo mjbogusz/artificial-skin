@@ -15,7 +15,7 @@ def main(args = None):
 	app = QtWidgets.QApplication(args)
 
 	mainWindow = MainWindow(None)
-	serialReader = SerialReader(None, exchangeRowsColumns = True)
+	serialReader = SerialReader(None, exchangeRowsColumns = False)
 
 	serialReader.statusString.connect(mainWindow.updateStatus)
 	serialReader.serialPortsUpdated.connect(mainWindow.updateSerialPorts)

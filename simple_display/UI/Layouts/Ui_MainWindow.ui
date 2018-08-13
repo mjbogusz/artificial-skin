@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>565</width>
+    <width>883</width>
     <height>483</height>
    </rect>
   </property>
@@ -14,9 +14,26 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
      <widget class="QGraphicsView" name="mainView"/>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QSpinBox" name="columnSpinBox"/>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="rowSpinBox"/>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="PlotWidget" name="plotWidget"/>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
@@ -25,7 +42,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>565</width>
+     <width>883</width>
      <height>22</height>
     </rect>
    </property>
@@ -77,6 +94,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PlotWidget</class>
+   <extends>QGraphicsView</extends>
+   <header>pyqtgraph.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>

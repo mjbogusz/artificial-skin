@@ -1,5 +1,6 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
 from UI.Layouts import Ui_MainWindow
+import pyqtgraph as pg
 
 class MainWindow(QtWidgets.QMainWindow):
 	serialPortSelected = QtCore.pyqtSignal(str)
@@ -12,6 +13,8 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.rows = 1
 		self.columns = 1
 		self.mapData = [[0]]
+		self.selectedCell = (0, 0)
+		self.cellData = []
 
 		self.serialActionGroup = QtWidgets.QActionGroup(self, exclusive = True)
 
@@ -19,13 +22,15 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.ui.setupUi(self)
 
 		self.mainScene = QtWidgets.QGraphicsScene(self)
-		self.ui.mainView.scale(-1, 1)
+		self.ui.mainView.scale(1, -1)
 		self.ui.mainView.setScene(self.mainScene)
 		self.ui.mainView.fitInView(self.mainScene.sceneRect(), QtCore.Qt.KeepAspectRatio)
 
 		self.serialActionGroup.triggered.connect(self.selectSerialPort)
 		self.ui.actionConnect.triggered.connect(self.serialConnect)
 		self.ui.actionDisconnect.triggered.connect(self.serialDisconnect)
+		self.ui.columnSpinBox.valueChanged.connect(self.selectedColumnChanged)
+		self.ui.rowSpinBox.valueChanged.connect(self.selectedRowChanged)
 
 		self.statusbarTextLabel = QtWidgets.QLabel(self.ui.statusbar)
 		self.ui.statusbar.addPermanentWidget(self.statusbarTextLabel)
@@ -71,10 +76,19 @@ class MainWindow(QtWidgets.QMainWindow):
 	def serialDisconnect(self):
 		self.serialDisconnectReq.emit()
 
-	def updateMap(self, rows, columns, mapData):
+	def selectedColumnChanged(self, column):
+		self.selectedCell = (column, self.selectedCell[1])
+
+	def selectedRowChanged(self, row):
+		self.selectedCell = (self.selectedCell[0], row)
+
+	def updateMap(self, rows, columns, mapData, mapRawData):
 		self.rows = rows
 		self.columns = columns
 		self.mapData = mapData
+
+		self.cellData.append(mapRawData[self.selectedCell[0]][self.selectedCell[1]])
+
 		self.repaintMap()
 
 	def repaintMap(self):
@@ -94,8 +108,14 @@ class MainWindow(QtWidgets.QMainWindow):
 				y0 = j * fieldHeight
 				y1 = y0 + fieldHeight
 
-				value = self.mapData[i][j] * 255 / 3300
+				value = self.mapData[i][j] * 255
 				brush = QtGui.QBrush(QtGui.QColor(value, value, value), QtCore.Qt.SolidPattern)
 				pen = QtGui.QPen(brush, 1.0)
 
 				self.mainScene.addRect(x0, y0, x1, y1, pen, brush)
+
+		cellDataLen = len(self.cellData)
+		if cellDataLen > 100:
+			cellDataLen = 100
+		self.ui.plotWidget.clear()
+		self.ui.plotWidget.plot(range(cellDataLen), self.cellData[-100:], pen = (0, 1))

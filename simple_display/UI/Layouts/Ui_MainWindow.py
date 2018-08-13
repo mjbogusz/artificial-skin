@@ -7,21 +7,37 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from pyqtgraph import PlotWidget
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(565, 483)
+        MainWindow.resize(883, 483)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-        self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
-        self.gridLayout.setObjectName("gridLayout")
+        self.horizontalLayout = QtWidgets.QHBoxLayout(self.centralwidget)
+        self.horizontalLayout.setObjectName("horizontalLayout")
         self.mainView = QtWidgets.QGraphicsView(self.centralwidget)
         self.mainView.setObjectName("mainView")
-        self.gridLayout.addWidget(self.mainView, 0, 0, 1, 1)
+        self.horizontalLayout.addWidget(self.mainView)
+        self.verticalLayout = QtWidgets.QVBoxLayout()
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.columnSpinBox = QtWidgets.QSpinBox(self.centralwidget)
+        self.columnSpinBox.setObjectName("columnSpinBox")
+        self.horizontalLayout_2.addWidget(self.columnSpinBox)
+        self.rowSpinBox = QtWidgets.QSpinBox(self.centralwidget)
+        self.rowSpinBox.setObjectName("rowSpinBox")
+        self.horizontalLayout_2.addWidget(self.rowSpinBox)
+        self.verticalLayout.addLayout(self.horizontalLayout_2)
+        self.plotWidget = PlotWidget(self.centralwidget)
+        self.plotWidget.setObjectName("plotWidget")
+        self.verticalLayout.addWidget(self.plotWidget)
+        self.horizontalLayout.addLayout(self.verticalLayout)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 565, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 883, 22))
         self.menubar.setObjectName("menubar")
         self.menuMenu = QtWidgets.QMenu(self.menubar)
         self.menuMenu.setObjectName("menuMenu")
@@ -62,4 +78,3 @@ class Ui_MainWindow(object):
         self.actionDisconnect.setText(_translate("MainWindow", "Disconnect"))
         self.actionQuit.setText(_translate("MainWindow", "Quit"))
         self.actionNoSerials.setText(_translate("MainWindow", "No serial connections"))
-
